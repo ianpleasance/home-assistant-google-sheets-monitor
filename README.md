@@ -101,6 +101,8 @@ When a change is detected, the integration fires a `google_sheets_row_change` ev
 | `row_number`        | The row number where the change occurred.                                 |
 | `row_data`          | The data from the row after the change (for `add` or `change` events).    |
 
+Note that the row_data is in JSON format using the column headers as field names, for example two columns title "Branch" and "City" and two row values of "Southern" and "London" will be passed as {"Branch": "Southern", "City": "London"}
+
 ---
 
 ## Example Automation
@@ -132,8 +134,8 @@ automation:
 - Ensure all sheets being monitored have a **header row**.
 - The service account must have access to the spreadsheet with at least **Viewer** permissions.
 - If the headers in a sheet are not unique, monitoring will fail with an error. Make sure all headers in the first row are unique.
+- If the scan interval is too low then you may receive multiple events for a row as a user edits it.
 
 ---
 
-Let me know if you have any questions!
 
