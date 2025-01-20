@@ -1,0 +1,10 @@
+{
+  "domain": "google_sheets_monitor",
+  "name": "Google Sheets Monitor",
+  "version": "1.2",
+  "documentation": "https://github.com/ianpleasance/home-assistant-google-sheets-monitor/README.md",
+  "requirements": ["gspread"],
+  "dependencies": [],
+  "codeowners": ["@ianpleasance"]
+}
+
