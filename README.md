@@ -39,14 +39,14 @@ A Home Assistant custom integration to monitor changes in Google Sheets and trig
 1. Open the Google Sheet to monitor.
 2. Click **Share** in the top-right corner.
 3. Enter the email address from the `client_email` field in the credentials file (e.g., `service-account@your-project.iam.gserviceaccount.com`).
-4. Set access to **Viewer** (or higher) and click **Send**.
+4. Set access to **Viewer** (or higher) and click **Share**.
 
 ### 3. Install the Integration
 1. Copy the `google_sheets_monitor` folder to your Home Assistant `custom_components` directory:
    ```
    <config_directory>/custom_components/google_sheets_monitor
    ```
-   If the `custom_components` directory does not exist, create it.
+   If the `custom_components` directory does not exist, create it first.
 
 2. Restart Home Assistant.
 
@@ -54,7 +54,7 @@ A Home Assistant custom integration to monitor changes in Google Sheets and trig
 
 ## Configuration
 
-Add the following to your `configuration.yaml` file:
+1. Add the following to your `configuration.yaml` file:
 
 ```yaml
 google_sheets_monitor:
@@ -75,6 +75,8 @@ google_sheets_monitor:
           name: "Sheet2"       # Optional
           scan_interval: 45    # Optional
 ```
+
+2. Restart Home Assistant.
 
 ### Parameters
 
@@ -132,6 +134,7 @@ automation:
 ## Notes
 
 - Ensure all sheets being monitored have a **header row**.
+- The names of people are just unique strings and do not relate to Home Assistant people or users, but generally you'd align them.
 - The service account must have access to the spreadsheet with at least **Viewer** permissions.
 - If the headers in a sheet are not unique, monitoring will fail with an error. Make sure all headers in the first row are unique.
 - If the scan interval is too low then you may receive multiple events for a row as a user edits it.
