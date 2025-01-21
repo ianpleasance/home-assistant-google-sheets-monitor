@@ -134,10 +134,10 @@ automation:
 ## Notes
 
 - Ensure all sheets being monitored have a **header row**.
+- If the headers in a sheet are not unique, monitoring will fail with an error. Make sure all headers in the first row are unique.
 - The names of people are just unique strings and do not relate to Home Assistant people or users, but generally you'd align them.
 - The service account must have access to the spreadsheet with at least **Viewer** permissions.
-- If the headers in a sheet are not unique, monitoring will fail with an error. Make sure all headers in the first row are unique.
-- If the scan interval is too low then you may receive multiple events for a row as a user edits it.
+- If the scan interval is too low then you may receive multiple events for a row as a user edits it. Also when selecting a scan interval be aware that Google does rate-limit clients and so setting the scan interval to a low value (and therefore the API call frequency high) could lead to the integration being blocked with HTTP 500 errors. In this case increasing the scan interval and restarting HASS should fix this.
 
 ---
 
