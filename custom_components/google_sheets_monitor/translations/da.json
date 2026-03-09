@@ -1,0 +1,59 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Google Sheets Monitor — Legitimationsoplysninger",
+        "description": "Indtast et navn til denne monitor og indsæt hele indholdet af din Google-tjenestekonto-legitimationsfil (JSON).",
+        "data": {
+          "person_name": "Monitornavn",
+          "credentials_json": "Tjenestekontolegitimationsoplysninger (JSON)"
+        },
+        "data_description": {
+          "person_name": "En etiket til denne monitor (f.eks. 'Alice'). Bruges i hændelsesdata.",
+          "credentials_json": "Indsæt det fulde indhold af din JSON-nøglefil."
+        }
+      },
+      "sheet": {
+        "title": "Tilføj et ark til overvågning",
+        "description": "Konfigurer et Google-ark til {person_name}. Tilføjede ark: {sheet_count}.",
+        "data": {
+          "id": "Regnearks-ID",
+          "name": "Arknavn (valgfrit)",
+          "scan_interval": "Scanningsinterval (sekunder)"
+        },
+        "data_description": {
+          "id": "Regnearks-ID'et fra URL'en: docs.google.com/spreadsheets/d/{ID}/edit",
+          "name": "Navnet på den fane, der skal overvåges. Lad stå tomt for det første ark.",
+          "scan_interval": "Hvor ofte der kontrolleres for ændringer (10–3600 sek., standard: 30)."
+        }
+      },
+      "add_another": {
+        "title": "Tilføj endnu et ark?",
+        "description": "{sheet_count} ark konfigureret til {person_name}.",
+        "data": {
+          "add_another": "Tilføj endnu et ark"
+        }
+      }
+    },
+    "error": {
+      "invalid_json": "Legitimationsoplysningerne er ikke gyldigt JSON.",
+      "missing_fields": "JSON-filen mangler påkrævede felter. Sørg for at downloade en tjenestekonto-nøgle.",
+      "not_service_account": "Legitimationsoplysningerne skal være en tjenestekonto-nøgle.",
+      "cannot_connect": "Kunne ikke godkende med Google. Tjek legitimationsoplysningerne.",
+      "name_required": "Monitornavnet må ikke være tomt.",
+      "sheet_id_required": "Regnearks-ID'et må ikke være tomt.",
+      "unknown": "Der opstod en uventet fejl."
+    },
+    "abort": {
+      "already_configured": "En monitor med dette navn er allerede konfigureret."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Google Sheets Monitor-indstillinger",
+        "description": "Juster scanningsintervallet for hvert konfigureret ark."
+      }
+    }
+  }
+}

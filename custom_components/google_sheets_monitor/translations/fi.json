@@ -1,0 +1,59 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Google Sheets Monitor — Tunnistetiedot",
+        "description": "Anna tälle monitorille nimi ja liitä Google-palvelutilisi JSON-avaintiedoston koko sisältö.",
+        "data": {
+          "person_name": "Monitorin nimi",
+          "credentials_json": "Palvelutilin tunnistetiedot (JSON)"
+        },
+        "data_description": {
+          "person_name": "Tunniste tälle monitorille (esim. 'Alice'). Käytetään tapahtumatiedoissa.",
+          "credentials_json": "Liitä JSON-avaintiedoston koko sisältö tähän."
+        }
+      },
+      "sheet": {
+        "title": "Lisää seurattava taulukko",
+        "description": "Määritä seurattava Google-taulukko kohteelle {person_name}. Lisätyt taulukot: {sheet_count}.",
+        "data": {
+          "id": "Laskentataulukon tunnus",
+          "name": "Taulukon nimi (valinnainen)",
+          "scan_interval": "Skannausväli (sekuntia)"
+        },
+        "data_description": {
+          "id": "Laskentataulukon tunnus URL:sta: docs.google.com/spreadsheets/d/{ID}/edit",
+          "name": "Seurattavan välilehden nimi. Jätä tyhjäksi ensimmäistä taulukkoa varten.",
+          "scan_interval": "Kuinka usein muutoksia tarkistetaan (10–3600 sek., oletus: 30)."
+        }
+      },
+      "add_another": {
+        "title": "Lisätäänkö toinen taulukko?",
+        "description": "{sheet_count} taulukko(a) määritetty kohteelle {person_name}.",
+        "data": {
+          "add_another": "Lisää toinen taulukko"
+        }
+      }
+    },
+    "error": {
+      "invalid_json": "Tunnistetiedot eivät ole kelvollista JSON-muotoa.",
+      "missing_fields": "JSON-tiedostosta puuttuu pakollisia kenttiä. Varmista, että latasit palvelutilin avaimen.",
+      "not_service_account": "Tunnistetietojen on oltava palvelutilin avain.",
+      "cannot_connect": "Googlen todennus epäonnistui. Tarkista tunnistetiedot.",
+      "name_required": "Monitorin nimi ei voi olla tyhjä.",
+      "sheet_id_required": "Laskentataulukon tunnus ei voi olla tyhjä.",
+      "unknown": "Odottamaton virhe tapahtui."
+    },
+    "abort": {
+      "already_configured": "Tällä nimellä on jo määritetty monitori."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Google Sheets Monitor -asetukset",
+        "description": "Säädä skannausväliä kullekin määritetylle taulukolle."
+      }
+    }
+  }
+}

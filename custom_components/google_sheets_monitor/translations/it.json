@@ -1,0 +1,59 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Google Sheets Monitor — Credenziali",
+        "description": "Inserisci un nome per questo monitor e incolla il contenuto completo del file JSON delle credenziali del tuo account di servizio Google.",
+        "data": {
+          "person_name": "Nome del monitor",
+          "credentials_json": "Credenziali account di servizio (JSON)"
+        },
+        "data_description": {
+          "person_name": "Un'etichetta per questo monitor (es. 'Alice'). Usata nei dati degli eventi.",
+          "credentials_json": "Incolla l'intero contenuto del file chiave JSON."
+        }
+      },
+      "sheet": {
+        "title": "Aggiungi un foglio da monitorare",
+        "description": "Configura un foglio Google per {person_name}. Fogli aggiunti: {sheet_count}.",
+        "data": {
+          "id": "ID del foglio di calcolo",
+          "name": "Nome del foglio (opzionale)",
+          "scan_interval": "Intervallo di scansione (secondi)"
+        },
+        "data_description": {
+          "id": "L'ID del foglio dall'URL: docs.google.com/spreadsheets/d/{ID}/edit",
+          "name": "Nome della scheda da monitorare. Lasciare vuoto per il primo foglio.",
+          "scan_interval": "Frequenza di controllo delle modifiche (10–3600 sec., predefinito: 30)."
+        }
+      },
+      "add_another": {
+        "title": "Aggiungere un altro foglio?",
+        "description": "{sheet_count} foglio/i configurato/i per {person_name}.",
+        "data": {
+          "add_another": "Aggiungi un altro foglio"
+        }
+      }
+    },
+    "error": {
+      "invalid_json": "Le credenziali non sono JSON valido.",
+      "missing_fields": "Nel JSON mancano campi obbligatori. Assicurati di aver scaricato una chiave account di servizio.",
+      "not_service_account": "Le credenziali devono essere una chiave account di servizio.",
+      "cannot_connect": "Autenticazione con Google non riuscita. Verifica le credenziali.",
+      "name_required": "Il nome del monitor non può essere vuoto.",
+      "sheet_id_required": "L'ID del foglio di calcolo non può essere vuoto.",
+      "unknown": "Si è verificato un errore imprevisto."
+    },
+    "abort": {
+      "already_configured": "Un monitor con questo nome è già configurato."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opzioni Google Sheets Monitor",
+        "description": "Regola l'intervallo di scansione per ogni foglio configurato."
+      }
+    }
+  }
+}

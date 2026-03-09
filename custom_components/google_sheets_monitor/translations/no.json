@@ -1,0 +1,59 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Google Sheets Monitor — Legitimasjon",
+        "description": "Skriv inn et navn for denne monitoren og lim inn hele innholdet i JSON-nøkkelfilen for Google-tjenestekontoen din.",
+        "data": {
+          "person_name": "Monitornavn",
+          "credentials_json": "Tjenestekontolegittimasjon (JSON)"
+        },
+        "data_description": {
+          "person_name": "En etikett for denne monitoren (f.eks. 'Alice'). Brukes i hendelsedata.",
+          "credentials_json": "Lim inn hele innholdet i JSON-nøkkelfilen din."
+        }
+      },
+      "sheet": {
+        "title": "Legg til et ark å overvåke",
+        "description": "Konfigurer et Google-ark for {person_name}. Lagt til ark: {sheet_count}.",
+        "data": {
+          "id": "Regneark-ID",
+          "name": "Arknavn (valgfritt)",
+          "scan_interval": "Skanningsintervall (sekunder)"
+        },
+        "data_description": {
+          "id": "Regneark-ID fra URL-en: docs.google.com/spreadsheets/d/{ID}/edit",
+          "name": "Navn på fanen som skal overvåkes. La stå tomt for første ark.",
+          "scan_interval": "Hvor ofte endringer kontrolleres (10–3600 sek., standard: 30)."
+        }
+      },
+      "add_another": {
+        "title": "Legg til et ark til?",
+        "description": "{sheet_count} ark konfigurert for {person_name}.",
+        "data": {
+          "add_another": "Legg til et ark til"
+        }
+      }
+    },
+    "error": {
+      "invalid_json": "Legitimasjonen er ikke gyldig JSON.",
+      "missing_fields": "Påkrevde felt mangler i JSON. Sørg for at du lastet ned en tjenestekonto-nøkkel.",
+      "not_service_account": "Legitimasjonen må være en tjenestekonto-nøkkel.",
+      "cannot_connect": "Kunne ikke autentisere med Google. Sjekk legitimasjonen.",
+      "name_required": "Monitornavnet kan ikke være tomt.",
+      "sheet_id_required": "Regneark-ID kan ikke være tomt.",
+      "unknown": "En uventet feil oppstod."
+    },
+    "abort": {
+      "already_configured": "En monitor med dette navnet er allerede konfigurert."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Google Sheets Monitor-alternativer",
+        "description": "Juster skanningsintervallet for hvert konfigurerte ark."
+      }
+    }
+  }
+}

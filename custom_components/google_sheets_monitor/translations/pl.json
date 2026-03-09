@@ -1,0 +1,59 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Google Sheets Monitor — Dane uwierzytelniające",
+        "description": "Podaj nazwę dla tego monitora i wklej pełną zawartość pliku JSON z kluczem konta usługi Google.",
+        "data": {
+          "person_name": "Nazwa monitora",
+          "credentials_json": "Dane uwierzytelniające konta usługi (JSON)"
+        },
+        "data_description": {
+          "person_name": "Etykieta dla tego monitora (np. 'Alice'). Używana w danych zdarzeń.",
+          "credentials_json": "Wklej całą zawartość pliku klucza JSON."
+        }
+      },
+      "sheet": {
+        "title": "Dodaj arkusz do monitorowania",
+        "description": "Skonfiguruj arkusz Google dla {person_name}. Dodane arkusze: {sheet_count}.",
+        "data": {
+          "id": "ID arkusza kalkulacyjnego",
+          "name": "Nazwa arkusza (opcjonalnie)",
+          "scan_interval": "Interwał skanowania (sekundy)"
+        },
+        "data_description": {
+          "id": "ID arkusza z adresu URL: docs.google.com/spreadsheets/d/{ID}/edit",
+          "name": "Nazwa karty do monitorowania. Pozostaw puste dla pierwszego arkusza.",
+          "scan_interval": "Jak często sprawdzać zmiany (10–3600 sek., domyślnie: 30)."
+        }
+      },
+      "add_another": {
+        "title": "Dodać kolejny arkusz?",
+        "description": "Skonfigurowano {sheet_count} arkusz(y) dla {person_name}.",
+        "data": {
+          "add_another": "Dodaj kolejny arkusz"
+        }
+      }
+    },
+    "error": {
+      "invalid_json": "Dane uwierzytelniające nie są prawidłowym formatem JSON.",
+      "missing_fields": "W pliku JSON brakuje wymaganych pól. Upewnij się, że pobrano klucz konta usługi.",
+      "not_service_account": "Dane uwierzytelniające muszą być kluczem konta usługi.",
+      "cannot_connect": "Nie udało się uwierzytelnić w Google. Sprawdź dane uwierzytelniające.",
+      "name_required": "Nazwa monitora nie może być pusta.",
+      "sheet_id_required": "ID arkusza kalkulacyjnego nie może być puste.",
+      "unknown": "Wystąpił nieoczekiwany błąd."
+    },
+    "abort": {
+      "already_configured": "Monitor o tej nazwie jest już skonfigurowany."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opcje Google Sheets Monitor",
+        "description": "Dostosuj interwał skanowania dla każdego skonfigurowanego arkusza."
+      }
+    }
+  }
+}

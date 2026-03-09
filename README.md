@@ -1,115 +1,120 @@
-
 # Google Sheets Monitor
 
-A Home Assistant custom integration to monitor changes in Google Sheets and trigger automations. This component allows you to detect when rows are added, deleted, or changed in specified Google Sheets and perform actions accordingly.
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)
+[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](https://github.com/ianpleasance/home-assistant-google-sheets-monitor)
+
+A Home Assistant custom integration that monitors Google Sheets for row changes, additions, and deletions, and fires events that can trigger automations.
 
 ---
 
 ## Features
 
-- Monitor multiple Google Sheets for changes, additions, or deletions.
-- Supports individual configurations for different users, including:
-  - Separate credentials for each user.
-  - Per-sheet monitoring with optional subsheet names.
-  - Configurable scan intervals (default: 30 seconds).
-- Sends detailed events to Home Assistant for automation.
+- Monitor multiple Google Sheets for row-level changes, additions, and deletions
+- Configure via the Home Assistant UI — no `configuration.yaml` editing required
+- Credentials stored securely in Home Assistant's encrypted config store — no JSON files on disk
+- Supports multiple independent monitors (one config entry per person / use case)
+- Configurable scan interval per sheet (10–3600 seconds, default: 30)
+- Optional subsheet (tab) targeting — defaults to the first sheet if not specified
+- Fires a `google_sheets_row_change` event with full row data and a timestamp for easy automation
+- All 13 languages supported: Danish, Dutch, English, Finnish, French, German, Italian, Japanese, Norwegian, Polish, Portuguese, Spanish, Swedish
 
 ---
 
 ## Requirements
 
-1. A Google Cloud project with the **Google Sheets API** enabled.
-2. A service account credentials file for each user.
-3. Google Sheets must:
-   - Have a **header row** as the first row.
-   - Be shared with the email address specified in the `client_email` field of the service account credentials file (with **Viewer** access or higher).
+1. A Google Cloud project with the **Google Sheets API** enabled
+2. A **Service Account** with a downloaded JSON key file
+3. The Google Sheet must be shared with the service account's `client_email` (Viewer access is sufficient)
+4. Home Assistant 2024.1.0 or newer
 
 ---
 
 ## Installation
 
-### 1. Enable Google Sheets API
-1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
-2. Create a new project or select an existing project.
-3. Enable the **Google Sheets API** for the project.
-4. Create a **Service Account** under **APIs & Services > Credentials**.
-5. Download the service account credentials JSON file.
+### Via HACS (recommended)
 
-### 2. Share the Spreadsheet
-1. Open the Google Sheet to monitor.
-2. Click **Share** in the top-right corner.
-3. Enter the email address from the `client_email` field in the credentials file (e.g., `service-account@your-project.iam.gserviceaccount.com`).
-4. Set access to **Viewer** (or higher) and click **Share**.
+1. Open HACS in Home Assistant
+2. Go to **Integrations** → **⋮** → **Custom repositories**
+3. Add `https://github.com/ianpleasance/home-assistant-google-sheets-monitor` as category **Integration**
+4. Search for **Google Sheets Monitor** and install it
+5. Restart Home Assistant
 
-### 3. Install the Integration
-1. Copy the `google_sheets_monitor` folder to your Home Assistant `custom_components` directory:
-   ```
-   <config_directory>/custom_components/google_sheets_monitor
-   ```
-   If the `custom_components` directory does not exist, create it first.
+### Manual
 
-2. Restart Home Assistant.
+1. Copy the `google_sheets_monitor` folder to your `<config>/custom_components/` directory
+2. Restart Home Assistant
+
+---
+
+## Google Cloud Setup
+
+### 1. Enable the Google Sheets API
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select an existing one
+3. Navigate to **APIs & Services → Library**
+4. Search for **Google Sheets API** and enable it
+
+### 2. Create a Service Account
+
+1. Go to **APIs & Services → Credentials**
+2. Click **Create Credentials → Service Account**
+3. Give it a name and click **Create and Continue**
+4. No additional roles are required — click **Done**
+5. Click the service account you just created
+6. Go to the **Keys** tab → **Add Key → Create new key → JSON**
+7. The JSON key file will be downloaded automatically
+
+### 3. Share Your Spreadsheet
+
+1. Open the Google Sheet you want to monitor
+2. Click **Share**
+3. Enter the `client_email` from the downloaded JSON file (e.g. `my-monitor@my-project.iam.gserviceaccount.com`)
+4. Set access to **Viewer** and click **Share**
 
 ---
 
 ## Configuration
 
-1. Add the following to your `configuration.yaml` file:
+1. In Home Assistant go to **Settings → Devices & Services → Add Integration**
+2. Search for **Google Sheets Monitor**
+3. Enter a **Monitor Name** (any label, e.g. `Alice` or `Sales Tracker`) — this appears in event data
+4. Open your downloaded JSON key file in a text editor, select all, and paste the contents into the **Service Account Credentials** field
+5. Click **Submit** — the integration will validate the credentials by connecting to Google
+6. Enter the **Spreadsheet ID** (from the spreadsheet URL: `docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/edit`)
+7. Optionally enter a **Sheet Name** (the tab name) — leave blank to monitor the first sheet
+8. Set a **Scan Interval** in seconds (default: 30)
+9. Choose whether to add more sheets for this monitor, then click **Submit** to finish
 
-```yaml
-google_sheets_monitor:
-  people:
-    - name: "Alice"
-      credentials_file: "alice_credentials.json"
-      sheets:
-        - id: "spreadsheet_id_1"
-          name: "Sheet1"       # Optional, defaults to the first sheet
-          scan_interval: 30    # Optional, default is 30 seconds
-        - id: "spreadsheet_id_2"
-          scan_interval: 60    # Optional
-
-    - name: "Bob"
-      credentials_file: "bob_credentials.json"
-      sheets:
-        - id: "spreadsheet_id_3"
-          name: "Sheet2"       # Optional
-          scan_interval: 45    # Optional
-```
-
-2. Restart Home Assistant.
-
-### Parameters
-
-- **`people`**: A list of users, each with:
-  - **`name`**: Name of the person (used in logs and events).
-  - **`credentials_file`**: Path to the Google service account credentials JSON file.
-  - **`sheets`**: A list of spreadsheets to monitor, each with:
-    - **`id`**: The spreadsheet ID (from the URL: `https://docs.google.com/spreadsheets/d/<spreadsheet_id>/edit`).
-    - **`name`**: (Optional) The subsheet name. Defaults to the first sheet if not specified.
-    - **`scan_interval`**: (Optional) Scan frequency in seconds. Default: 30 seconds.
+To monitor sheets for a different person or with different credentials, add a second integration instance via **Add Integration** again.
 
 ---
 
 ## Events
 
-When a change is detected, the integration fires a `google_sheets_row_change` event with the following data:
+When a change is detected, the integration fires a `google_sheets_row_change` event with the following payload:
 
-| Field               | Description                                                                 |
-|---------------------|-----------------------------------------------------------------------------|
-| `person`            | The name of the person associated with the sheet.                         |
-| `spreadsheet_id`    | The ID of the monitored spreadsheet.                                       |
-| `sheet_name`        | The name of the monitored subsheet.                                        |
-| `event_type`        | The type of change: `add`, `delete`, or `change`.                         |
-| `row_number`        | The row number where the change occurred.                                 |
-| `row_data`          | The data from the row after the change (for `add` or `change` events).    |
+| Field | Description |
+|---|---|
+| `person` | The monitor name set during configuration |
+| `spreadsheet_id` | The ID of the monitored spreadsheet |
+| `sheet_name` | The name of the monitored tab |
+| `event_type` | The type of change: `add`, `delete`, or `change` |
+| `row_number` | The 1-based row number where the change occurred |
+| `row_data` | The row contents as a dict keyed by column header (for `add` and `change` events); the previous contents for `delete` events |
+| `fired_at` | ISO 8601 timestamp of when the event was fired |
 
-Note that the row_data is in JSON format using the column headers as field names, for example two columns title "Branch" and "City" and two row values of "Southern" and "London" will be passed as {"Branch": "Southern", "City": "London"}
+### Row data format
+
+Row data is a dictionary using the spreadsheet's header row as keys. For example, a sheet with columns **Branch** and **City** and values **Southern** and **London** produces:
+
+```json
+{"Branch": "Southern", "City": "London"}
+```
 
 ---
 
 ## Example Automation
-
-Here’s an example automation to send a notification when a row changes:
 
 ```yaml
 automation:
@@ -117,28 +122,53 @@ automation:
     trigger:
       platform: event
       event_type: google_sheets_row_change
+    condition:
+      - condition: template
+        value_template: "{{ trigger.event.data.event_type == 'add' }}"
     action:
-      - service: notify.notify
-        data_template:
+      - service: notify.mobile_app_my_phone
+        data:
+          title: "Spreadsheet updated"
           message: >
-            Person: {{ trigger.event.data.person }}
-            Spreadsheet: {{ trigger.event.data.spreadsheet_id }}
-            Sheet: {{ trigger.event.data.sheet_name }}
-            Row: {{ trigger.event.data.row_number }}
-            Event: {{ trigger.event.data.event_type }}
-            Data: {{ trigger.event.data.row_data }}
+            New row added by {{ trigger.event.data.person }}
+            in {{ trigger.event.data.sheet_name }}:
+            {{ trigger.event.data.row_data }}
 ```
+
+You can filter by `person`, `spreadsheet_id`, or `event_type` in the trigger or condition to handle specific sheets or change types differently.
 
 ---
 
 ## Notes
 
-- Ensure all sheets being monitored have a **header row**.
-- If the headers in a sheet are not unique, monitoring will fail with an error. Make sure all headers in the first row are unique.
-- The names of people are just unique strings and do not relate to Home Assistant people or users, but generally you'd align them.
-- The service account must have access to the spreadsheet with at least **Viewer** permissions.
-- If the scan interval is too low then you may receive multiple events for a row as a user edits it. Also when selecting a scan interval be aware that Google does rate-limit clients and so setting the scan interval to a low value (and therefore the API call frequency high) could lead to the integration being blocked with HTTP 500 errors. In this case increasing the scan interval and restarting HASS should fix this.
+- The first poll after setup or restart initialises the baseline state — no events are fired on that first run
+- State is persisted across Home Assistant restarts using HA's internal storage (`.storage/google_sheets_monitor_*`)
+- Google rate-limits Sheets API calls. Setting a very low scan interval across many sheets may result in HTTP 429 errors. If this happens, increase the interval and restart Home Assistant
+- Sheet headers must be unique — duplicate column names will cause `gspread` to raise an error
+- The monitor name does not need to match a Home Assistant user or person entity
 
 ---
 
+## Upgrading from v1.2
 
+Version 1.3.0 replaces the legacy `configuration.yaml` setup with a UI config flow. After upgrading:
+
+1. Remove the `google_sheets_monitor:` block from your `configuration.yaml`
+2. Restart Home Assistant
+3. Go to **Settings → Devices & Services → Add Integration** and configure via the UI
+4. Your service account JSON file is no longer needed on disk — paste its contents into the UI and it will be stored securely by Home Assistant
+
+---
+
+## Version History
+
+| Version | Changes |
+|---|---|
+| 1.3.0 | Full config flow UI setup; credentials stored in HA secure storage (no JSON file on disk); fixed closure bug causing all sheets to poll only the last configured sheet; API scope narrowed to `spreadsheets.readonly`; state persistence migrated to HA `Store` helper; credentials cached at setup (not reloaded every poll); clean unload/reload support; `fired_at` timestamp added to events; structured error handling per exception type; 13-language translation support; HACS support |
+| 1.2.0 | `configuration.yaml`-based setup |
+
+---
+
+## License
+
+MIT License — see [LICENSE](LICENSE)

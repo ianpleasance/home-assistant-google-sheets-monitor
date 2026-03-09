@@ -1,0 +1,59 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Google Sheets Monitor — Identifiants",
+        "description": "Saisissez un nom pour ce moniteur et collez le contenu complet de votre fichier JSON de compte de service Google.",
+        "data": {
+          "person_name": "Nom du moniteur",
+          "credentials_json": "Identifiants du compte de service (JSON)"
+        },
+        "data_description": {
+          "person_name": "Une étiquette pour ce moniteur (ex. : 'Alice'). Utilisé dans les données d'événement.",
+          "credentials_json": "Collez le contenu entier de votre fichier de clé JSON."
+        }
+      },
+      "sheet": {
+        "title": "Ajouter une feuille à surveiller",
+        "description": "Configurez une feuille Google pour {person_name}. Feuilles ajoutées : {sheet_count}.",
+        "data": {
+          "id": "ID de la feuille de calcul",
+          "name": "Nom de la feuille (optionnel)",
+          "scan_interval": "Intervalle de scan (secondes)"
+        },
+        "data_description": {
+          "id": "L'ID de la feuille depuis l'URL : docs.google.com/spreadsheets/d/{ID}/edit",
+          "name": "Nom de l'onglet à surveiller. Laisser vide pour la première feuille.",
+          "scan_interval": "Fréquence de vérification des changements (10–3600 sec., défaut : 30)."
+        }
+      },
+      "add_another": {
+        "title": "Ajouter une autre feuille ?",
+        "description": "{sheet_count} feuille(s) configurée(s) pour {person_name}.",
+        "data": {
+          "add_another": "Ajouter une autre feuille"
+        }
+      }
+    },
+    "error": {
+      "invalid_json": "Les identifiants ne sont pas du JSON valide.",
+      "missing_fields": "Des champs obligatoires manquent dans le JSON. Assurez-vous d'avoir téléchargé une clé de compte de service.",
+      "not_service_account": "Les identifiants doivent être une clé de compte de service.",
+      "cannot_connect": "Impossible de s'authentifier auprès de Google. Vérifiez les identifiants.",
+      "name_required": "Le nom du moniteur ne peut pas être vide.",
+      "sheet_id_required": "L'ID de la feuille de calcul ne peut pas être vide.",
+      "unknown": "Une erreur inattendue s'est produite."
+    },
+    "abort": {
+      "already_configured": "Un moniteur avec ce nom est déjà configuré."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options Google Sheets Monitor",
+        "description": "Ajustez l'intervalle de scan pour chaque feuille configurée."
+      }
+    }
+  }
+}

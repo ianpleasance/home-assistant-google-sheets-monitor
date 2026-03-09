@@ -1,0 +1,59 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Google Sheets Monitor — Autentiseringsuppgifter",
+        "description": "Ange ett namn för den här monitorn och klistra in hela innehållet i din Google-tjänstekonto JSON-nyckelfil.",
+        "data": {
+          "person_name": "Monitornamn",
+          "credentials_json": "Tjänstekontoautentiseringsuppgifter (JSON)"
+        },
+        "data_description": {
+          "person_name": "En etikett för den här monitorn (t.ex. 'Alice'). Används i händelsedata.",
+          "credentials_json": "Klistra in hela innehållet i din JSON-nyckelfil."
+        }
+      },
+      "sheet": {
+        "title": "Lägg till ett kalkylblad att övervaka",
+        "description": "Konfigurera ett Google-kalkylblad för {person_name}. Tillagda blad: {sheet_count}.",
+        "data": {
+          "id": "Kalkylblads-ID",
+          "name": "Bladnamn (valfritt)",
+          "scan_interval": "Skanningsintervall (sekunder)"
+        },
+        "data_description": {
+          "id": "Kalkylblads-ID:t från URL:en: docs.google.com/spreadsheets/d/{ID}/edit",
+          "name": "Namnet på fliken att övervaka. Lämna tomt för det första bladet.",
+          "scan_interval": "Hur ofta ändringar kontrolleras (10–3600 sek., standard: 30)."
+        }
+      },
+      "add_another": {
+        "title": "Lägga till ytterligare ett blad?",
+        "description": "{sheet_count} blad konfigurerat/konfigurerade för {person_name}.",
+        "data": {
+          "add_another": "Lägg till ytterligare ett blad"
+        }
+      }
+    },
+    "error": {
+      "invalid_json": "Autentiseringsuppgifterna är inte giltig JSON.",
+      "missing_fields": "Obligatoriska fält saknas i JSON. Se till att du har laddat ner en tjänstekontonyckel.",
+      "not_service_account": "Autentiseringsuppgifterna måste vara en tjänstekontonyckel.",
+      "cannot_connect": "Det gick inte att autentisera med Google. Kontrollera autentiseringsuppgifterna.",
+      "name_required": "Monitornamnet får inte vara tomt.",
+      "sheet_id_required": "Kalkylblads-ID:t får inte vara tomt.",
+      "unknown": "Ett oväntat fel inträffade."
+    },
+    "abort": {
+      "already_configured": "En monitor med det här namnet är redan konfigurerad."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Google Sheets Monitor-alternativ",
+        "description": "Justera skanningsintervallet för varje konfigurerat blad."
+      }
+    }
+  }
+}

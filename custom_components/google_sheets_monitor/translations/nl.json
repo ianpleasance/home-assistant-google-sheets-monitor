@@ -1,0 +1,59 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Google Sheets Monitor — Inloggegevens",
+        "description": "Voer een naam in voor deze monitor en plak de volledige inhoud van uw Google-serviceaccount JSON-sleutelbestand.",
+        "data": {
+          "person_name": "Monitornaam",
+          "credentials_json": "Serviceaccount-inloggegevens (JSON)"
+        },
+        "data_description": {
+          "person_name": "Een label voor deze monitor (bijv. 'Alice'). Wordt gebruikt in gebeurtenisdata.",
+          "credentials_json": "Plak de volledige inhoud van uw JSON-sleutelbestand."
+        }
+      },
+      "sheet": {
+        "title": "Blad toevoegen om te monitoren",
+        "description": "Configureer een Google-blad voor {person_name}. Toegevoegde bladen: {sheet_count}.",
+        "data": {
+          "id": "Spreadsheet-ID",
+          "name": "Bladnaam (optioneel)",
+          "scan_interval": "Scaninterval (seconden)"
+        },
+        "data_description": {
+          "id": "Het spreadsheet-ID uit de URL: docs.google.com/spreadsheets/d/{ID}/edit",
+          "name": "Naam van het tabblad om te monitoren. Leeg laten voor het eerste blad.",
+          "scan_interval": "Hoe vaak op wijzigingen wordt gecontroleerd (10–3600 sec., standaard: 30)."
+        }
+      },
+      "add_another": {
+        "title": "Nog een blad toevoegen?",
+        "description": "{sheet_count} blad(en) geconfigureerd voor {person_name}.",
+        "data": {
+          "add_another": "Nog een blad toevoegen"
+        }
+      }
+    },
+    "error": {
+      "invalid_json": "De inloggegevens zijn geen geldige JSON.",
+      "missing_fields": "Verplichte velden ontbreken in de JSON. Zorg dat u een serviceaccountsleutel heeft gedownload.",
+      "not_service_account": "De inloggegevens moeten een serviceaccountsleutel zijn.",
+      "cannot_connect": "Verificatie bij Google mislukt. Controleer de inloggegevens.",
+      "name_required": "De monitornaam mag niet leeg zijn.",
+      "sheet_id_required": "Het spreadsheet-ID mag niet leeg zijn.",
+      "unknown": "Er is een onverwachte fout opgetreden."
+    },
+    "abort": {
+      "already_configured": "Een monitor met deze naam is al geconfigureerd."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Google Sheets Monitor-opties",
+        "description": "Pas het scaninterval aan voor elk geconfigureerd blad."
+      }
+    }
+  }
+}

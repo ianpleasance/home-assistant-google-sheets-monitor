@@ -1,0 +1,59 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Google Sheets Monitor — Credentials",
+        "description": "Enter a name for this monitor and paste the full contents of your Google service account credentials JSON file.\n\nTo create credentials: Google Cloud Console → IAM & Admin → Service Accounts → Create → Download JSON key.",
+        "data": {
+          "person_name": "Monitor Name",
+          "credentials_json": "Service Account Credentials (JSON)"
+        },
+        "data_description": {
+          "person_name": "A label for this monitor (e.g. 'Alice', 'Work Sheets'). Used in event data.",
+          "credentials_json": "Paste the entire contents of your service account JSON key file."
+        }
+      },
+      "sheet": {
+        "title": "Add a Sheet to Monitor",
+        "description": "Configure a Google Sheet to monitor for {person_name}. Sheets added so far: {sheet_count}.",
+        "data": {
+          "id": "Spreadsheet ID",
+          "name": "Sheet Name (optional)",
+          "scan_interval": "Scan Interval (seconds)"
+        },
+        "data_description": {
+          "id": "The spreadsheet ID from the URL: docs.google.com/spreadsheets/d/{ID}/edit",
+          "name": "Name of the tab to monitor. Leave blank to monitor the first sheet.",
+          "scan_interval": "How often to check for changes (10–3600 seconds, default: 30). Be aware Google rate-limits API calls."
+        }
+      },
+      "add_another": {
+        "title": "Add Another Sheet?",
+        "description": "{sheet_count} sheet(s) configured for {person_name}.",
+        "data": {
+          "add_another": "Add another sheet"
+        }
+      }
+    },
+    "error": {
+      "invalid_json": "Credentials are not valid JSON. Please paste the complete contents of the JSON key file.",
+      "missing_fields": "Credentials JSON is missing required fields. Ensure you downloaded a Service Account key, not an OAuth client.",
+      "not_service_account": "Credentials must be a Service Account key (type: service_account).",
+      "cannot_connect": "Could not authenticate with Google. Check the credentials and ensure the Sheets API is enabled in your Google Cloud project.",
+      "name_required": "Monitor name cannot be empty.",
+      "sheet_id_required": "Spreadsheet ID cannot be empty.",
+      "unknown": "An unexpected error occurred. Check the Home Assistant logs for details."
+    },
+    "abort": {
+      "already_configured": "A monitor with this name is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Google Sheets Monitor Options",
+        "description": "Adjust the scan interval for each configured sheet."
+      }
+    }
+  }
+}

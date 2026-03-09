@@ -1,10 +1,13 @@
 {
   "domain": "google_sheets_monitor",
   "name": "Google Sheets Monitor",
-  "version": "1.2",
-  "documentation": "https://github.com/ianpleasance/home-assistant-google-sheets-monitor/README.md",
-  "requirements": ["gspread"],
+  "version": "1.3.0",
+  "documentation": "https://github.com/ianpleasance/home-assistant-google-sheets-monitor",
+  "issue_tracker": "https://github.com/ianpleasance/home-assistant-google-sheets-monitor/issues",
+  "requirements": ["gspread>=6.0.0"],
   "dependencies": [],
-  "codeowners": ["@ianpleasance"]
+  "codeowners": ["@ianpleasance"],
+  "config_flow": true,
+  "iot_class": "cloud_polling",
+  "homeassistant": "2024.1.0"
 }
-

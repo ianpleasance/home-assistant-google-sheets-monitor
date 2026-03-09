@@ -1,151 +1,234 @@
-from homeassistant.helpers.event import async_track_time_interval
-from datetime import timedelta
-import gspread
-import aiofiles
+"""Google Sheets Monitor integration."""
+from __future__ import annotations
+
 import json
 import logging
+from datetime import timedelta
+from typing import Any
+
+import gspread
 from google.oauth2.service_account import Credentials
 
-DOMAIN = "google_sheets_monitor"
-STATE_STORAGE_FILE = "google_sheets_states.json"
-DEBUG = False
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.helpers.event import async_track_time_interval
+from homeassistant.helpers.storage import Store
+from homeassistant.util import dt as dt_util
+
+from .const import (
+    CONF_CREDENTIALS_JSON,
+    CONF_PERSON_NAME,
+    CONF_SCAN_INTERVAL,
+    CONF_SHEET_ID,
+    CONF_SHEET_NAME,
+    CONF_SHEETS,
+    DEFAULT_SCAN_INTERVAL,
+    DOMAIN,
+    EVENT_ROW_CHANGE,
+    GOOGLE_SCOPES,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
-async def async_setup(hass, config):
-    """Set up the Google Sheets Monitor integration."""
-    people_config = config[DOMAIN].get("people", [])
+STORAGE_VERSION = 1
 
-    # Load previous states from file asynchronously
-    async def load_states():
-        try:
-            async with aiofiles.open(hass.config.path(STATE_STORAGE_FILE), "r") as file:
-                return json.loads(await file.read())
-        except FileNotFoundError:
-            return {}
 
-    # Save states to file asynchronously
-    async def save_states():
-        async with aiofiles.open(hass.config.path(STATE_STORAGE_FILE), "w") as file:
-            await file.write(json.dumps(sheet_states))
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Set up Google Sheets Monitor from a config entry."""
+    hass.data.setdefault(DOMAIN, {})
 
-    # Initialize the states
-    sheet_states = await load_states()
+    person_name = entry.data[CONF_PERSON_NAME]
+    credentials_json = entry.data[CONF_CREDENTIALS_JSON]
+    sheets = entry.data[CONF_SHEETS]
 
-    async def fetch_spreadsheet(client, spreadsheet_id, sheet_name=None):
-        """Fetch spreadsheet data in a non-blocking way."""
-        spreadsheet = await hass.async_add_executor_job(client.open_by_key, spreadsheet_id)
-        sheet = (
-            await hass.async_add_executor_job(spreadsheet.worksheet, sheet_name)
-            if sheet_name
-            else await hass.async_add_executor_job(lambda: spreadsheet.sheet1)
+    # Parse and cache credentials once at setup — not on every poll
+    try:
+        creds_dict = json.loads(credentials_json)
+        raw_creds = await hass.async_add_executor_job(
+            Credentials.from_service_account_info, creds_dict
         )
+        creds = raw_creds.with_scopes(GOOGLE_SCOPES)
+    except (json.JSONDecodeError, ValueError, KeyError) as err:
+        _LOGGER.error("Invalid credentials JSON for %s: %s", person_name, err)
+        raise ConfigEntryNotReady(f"Invalid credentials: {err}") from err
+    except Exception as err:
+        _LOGGER.error("Failed to load credentials for %s: %s", person_name, err)
+        raise ConfigEntryNotReady(f"Credentials error: {err}") from err
+
+    # Persistent state storage using HA's Store helper
+    store = Store(hass, STORAGE_VERSION, f"{DOMAIN}_{entry.entry_id}")
+    sheet_states: dict[str, Any] = await store.async_load() or {}
+
+    # Track interval cancel callbacks so we can clean up on unload
+    cancel_callbacks = []
+
+    async def fetch_spreadsheet(
+        client: gspread.Client, spreadsheet_id: str, sheet_name: str | None
+    ) -> tuple[gspread.Worksheet, list[dict]]:
+        """Fetch spreadsheet data in a non-blocking way."""
+        spreadsheet = await hass.async_add_executor_job(
+            client.open_by_key, spreadsheet_id
+        )
+        if sheet_name:
+            sheet = await hass.async_add_executor_job(
+                spreadsheet.worksheet, sheet_name
+            )
+        else:
+            sheet = await hass.async_add_executor_job(lambda: spreadsheet.sheet1)
         data = await hass.async_add_executor_job(sheet.get_all_records)
         return sheet, data
 
-    async def check_sheet(now, person_name, creds_file, sheet_config):
-        """Periodically checks the Google Sheet for changes."""
-        try:
-            raw_creds = await hass.async_add_executor_job(
-                Credentials.from_service_account_file,
-                hass.config.path(creds_file),
-            )
-            creds = raw_creds.with_scopes(["https://www.googleapis.com/auth/spreadsheets"])
-            client = gspread.authorize(creds)
+    def make_check_sheet(
+        entry_person_name: str,
+        entry_creds: Credentials,
+        entry_sheet_config: dict,
+    ):
+        """Return a bound check_sheet coroutine — fixes closure capture bug."""
 
-            spreadsheet_id = sheet_config["id"]
-            sheet_name = sheet_config.get("name", None)
+        async def check_sheet(now) -> None:
+            """Periodically check a Google Sheet for changes."""
+            spreadsheet_id = entry_sheet_config[CONF_SHEET_ID]
+            sheet_name = entry_sheet_config.get(CONF_SHEET_NAME)
+            state_key = f"{entry_person_name}:{spreadsheet_id}"
 
-            if DEBUG:
-                _LOGGER.info(f"Monitoring sheet {spreadsheet_id} for {person_name}: {sheet_name}")           
-
-            # Fetch spreadsheet data
-            sheet, data = await fetch_spreadsheet(client, spreadsheet_id, sheet_name)
-
-            # Unique key to store state
-            state_key = f"{person_name}:{spreadsheet_id}"
+            try:
+                client = await hass.async_add_executor_job(
+                    gspread.authorize, entry_creds
+                )
+                sheet, data = await fetch_spreadsheet(
+                    client, spreadsheet_id, sheet_name
+                )
+            except gspread.exceptions.APIError as err:
+                _LOGGER.warning(
+                    "Google Sheets API error for %s / %s: %s",
+                    entry_person_name,
+                    spreadsheet_id,
+                    err,
+                )
+                return
+            except gspread.exceptions.SpreadsheetNotFound:
+                _LOGGER.error(
+                    "Spreadsheet %s not found or not shared with service account",
+                    spreadsheet_id,
+                )
+                return
+            except Exception as err:
+                _LOGGER.error(
+                    "Unexpected error monitoring sheet %s for %s: %s",
+                    spreadsheet_id,
+                    entry_person_name,
+                    err,
+                )
+                return
 
             if state_key not in sheet_states:
-                # First-time initialization
+                # First run — initialise state, no events fired
+                _LOGGER.debug(
+                    "Initialising state for %s / %s (%d rows)",
+                    entry_person_name,
+                    spreadsheet_id,
+                    len(data),
+                )
                 sheet_states[state_key] = data
-                await save_states()
+                await store.async_save(sheet_states)
                 return
 
             last_data = sheet_states[state_key]
- 
-            if DEBUG:
-                json_printable = json.dumps(last_data)
-                _LOGGER.info(f"Latest data = {json_printable}")
+            fired_at = dt_util.now().isoformat()
 
-            # Detect changes, additions, and deletions
+            # Changed or added rows
             for i, row in enumerate(data):
-                if i >= len(last_data) or row != last_data[i]:
-                    if DEBUG:
-                        _LOGGER.error("Firing row change")
+                if i >= len(last_data):
+                    _LOGGER.debug(
+                        "Row add detected: %s / %s row %d",
+                        entry_person_name,
+                        spreadsheet_id,
+                        i + 1,
+                    )
                     hass.bus.fire(
-                        "google_sheets_row_change",
+                        EVENT_ROW_CHANGE,
                         {
-                            "person": person_name,
+                            "person": entry_person_name,
+                            "spreadsheet_id": spreadsheet_id,
+                            "sheet_name": sheet.title,
+                            "event_type": "add",
+                            "row_number": i + 1,
+                            "row_data": row,
+                            "fired_at": fired_at,
+                        },
+                    )
+                elif row != last_data[i]:
+                    _LOGGER.debug(
+                        "Row change detected: %s / %s row %d",
+                        entry_person_name,
+                        spreadsheet_id,
+                        i + 1,
+                    )
+                    hass.bus.fire(
+                        EVENT_ROW_CHANGE,
+                        {
+                            "person": entry_person_name,
                             "spreadsheet_id": spreadsheet_id,
                             "sheet_name": sheet.title,
                             "event_type": "change",
                             "row_number": i + 1,
                             "row_data": row,
+                            "fired_at": fired_at,
                         },
                     )
 
-            if len(data) > len(last_data):
-                for i in range(len(last_data), len(data)):
-                    if DEBUG:
-                        _LOGGER.error("Firing row add")
-                    hass.bus.fire(
-                        "google_sheets_row_change",
-                        {
-                            "person": person_name,
-                            "spreadsheet_id": spreadsheet_id,
-                            "sheet_name": sheet.title,
-                            "event_type": "add",
-                            "row_number": i + 1,
-                            "row_data": data[i],
-                        },
-                    )
-
+            # Deleted rows
             if len(data) < len(last_data):
                 for i in range(len(data), len(last_data)):
-                    if DEBUG:
-                        _LOGGER.error("Firing row delete")
+                    _LOGGER.debug(
+                        "Row delete detected: %s / %s row %d",
+                        entry_person_name,
+                        spreadsheet_id,
+                        i + 1,
+                    )
                     hass.bus.fire(
-                        "google_sheets_row_change",
+                        EVENT_ROW_CHANGE,
                         {
-                            "person": person_name,
+                            "person": entry_person_name,
                             "spreadsheet_id": spreadsheet_id,
                             "sheet_name": sheet.title,
                             "event_type": "delete",
                             "row_number": i + 1,
                             "row_data": last_data[i],
+                            "fired_at": fired_at,
                         },
                     )
 
-            # Update state and save
             sheet_states[state_key] = data
-            await save_states()
+            await store.async_save(sheet_states)
 
-        except Exception as e:
-            _LOGGER.error(f"Error monitoring sheet {spreadsheet_id} for {person_name}: {e}")
+        return check_sheet
 
-    # Schedule checks for each person and their sheets
-    for person in people_config:
-        person_name = person["name"]
-        creds_file = person["credentials_file"]
-        sheets = person.get("sheets", [])
+    # Register a polling interval for each sheet
+    for sheet_config in sheets:
+        interval = sheet_config.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
+        check_fn = make_check_sheet(person_name, creds, sheet_config)
 
-        for sheet_config in sheets:
-            interval = sheet_config.get("scan_interval", 30)
+        # Run immediately on setup, then on interval
+        await check_fn(None)
 
-            async def periodic_check(now):
-                await check_sheet(now, person_name, creds_file, sheet_config)
+        cancel = async_track_time_interval(
+            hass, check_fn, timedelta(seconds=interval)
+        )
+        cancel_callbacks.append(cancel)
 
-            async_track_time_interval(hass, periodic_check, timedelta(seconds=interval))
+    hass.data[DOMAIN][entry.entry_id] = {
+        "cancel_callbacks": cancel_callbacks,
+        "store": store,
+    }
 
     return True
 
+
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Unload a config entry and cancel all polling intervals."""
+    entry_data = hass.data[DOMAIN].pop(entry.entry_id, {})
+    for cancel in entry_data.get("cancel_callbacks", []):
+        cancel()
+    return True

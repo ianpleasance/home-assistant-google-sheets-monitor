@@ -1,0 +1,59 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Google Sheets Monitor — Zugangsdaten",
+        "description": "Geben Sie einen Namen für diesen Monitor ein und fügen Sie den vollständigen Inhalt Ihrer Google-Dienstkonto-JSON-Datei ein.",
+        "data": {
+          "person_name": "Monitorname",
+          "credentials_json": "Dienstkonto-Zugangsdaten (JSON)"
+        },
+        "data_description": {
+          "person_name": "Eine Bezeichnung für diesen Monitor (z.B. 'Alice'). Wird in Ereignisdaten verwendet.",
+          "credentials_json": "Fügen Sie den gesamten Inhalt Ihrer JSON-Schlüsseldatei ein."
+        }
+      },
+      "sheet": {
+        "title": "Tabelle zur Überwachung hinzufügen",
+        "description": "Tabelle für {person_name} konfigurieren. Bisher hinzugefügte Tabellen: {sheet_count}.",
+        "data": {
+          "id": "Tabellen-ID",
+          "name": "Tabellenname (optional)",
+          "scan_interval": "Abtastintervall (Sekunden)"
+        },
+        "data_description": {
+          "id": "Die Tabellen-ID aus der URL: docs.google.com/spreadsheets/d/{ID}/edit",
+          "name": "Name des zu überwachenden Blatts. Leer lassen für das erste Blatt.",
+          "scan_interval": "Wie oft auf Änderungen geprüft wird (10–3600 Sek., Standard: 30)."
+        }
+      },
+      "add_another": {
+        "title": "Weitere Tabelle hinzufügen?",
+        "description": "{sheet_count} Tabelle(n) für {person_name} konfiguriert.",
+        "data": {
+          "add_another": "Weitere Tabelle hinzufügen"
+        }
+      }
+    },
+    "error": {
+      "invalid_json": "Die Zugangsdaten sind kein gültiges JSON.",
+      "missing_fields": "Der JSON-Datei fehlen erforderliche Felder. Stellen Sie sicher, dass Sie einen Dienstkontoschlüssel heruntergeladen haben.",
+      "not_service_account": "Die Zugangsdaten müssen ein Dienstkontoschlüssel sein.",
+      "cannot_connect": "Authentifizierung bei Google fehlgeschlagen. Überprüfen Sie die Zugangsdaten.",
+      "name_required": "Der Monitorname darf nicht leer sein.",
+      "sheet_id_required": "Die Tabellen-ID darf nicht leer sein.",
+      "unknown": "Ein unerwarteter Fehler ist aufgetreten."
+    },
+    "abort": {
+      "already_configured": "Ein Monitor mit diesem Namen ist bereits konfiguriert."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Google Sheets Monitor Optionen",
+        "description": "Passen Sie das Abtastintervall für jede konfigurierte Tabelle an."
+      }
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Google Sheets Monitor — 認証情報",
+        "description": "このモニターの名前を入力し、Googleサービスアカウントの認証情報JSONファイルの内容をすべて貼り付けてください。",
+        "data": {
+          "person_name": "モニター名",
+          "credentials_json": "サービスアカウント認証情報 (JSON)"
+        },
+        "data_description": {
+          "person_name": "このモニターのラベル（例：「Alice」）。イベントデータで使用されます。",
+          "credentials_json": "JSONキーファイルの内容全体を貼り付けてください。"
+        }
+      },
+      "sheet": {
+        "title": "監視するシートを追加",
+        "description": "{person_name} のGoogleシートを設定します。追加済みシート数: {sheet_count}。",
+        "data": {
+          "id": "スプレッドシートID",
+          "name": "シート名（省略可）",
+          "scan_interval": "スキャン間隔（秒）"
+        },
+        "data_description": {
+          "id": "URLのスプレッドシートID: docs.google.com/spreadsheets/d/{ID}/edit",
+          "name": "監視するタブ名。空白の場合は最初のシートを使用。",
+          "scan_interval": "変更確認の頻度（10〜3600秒、デフォルト: 30）。"
+        }
+      },
+      "add_another": {
+        "title": "別のシートを追加しますか？",
+        "description": "{person_name} に {sheet_count} 枚のシートが設定済みです。",
+        "data": {
+          "add_another": "別のシートを追加する"
+        }
+      }
+    },
+    "error": {
+      "invalid_json": "認証情報が有効なJSONではありません。",
+      "missing_fields": "JSONに必須フィールドがありません。サービスアカウントキーをダウンロードしたか確認してください。",
+      "not_service_account": "認証情報はサービスアカウントキーである必要があります。",
+      "cannot_connect": "Googleでの認証に失敗しました。認証情報を確認してください。",
+      "name_required": "モニター名を空にすることはできません。",
+      "sheet_id_required": "スプレッドシートIDを空にすることはできません。",
+      "unknown": "予期しないエラーが発生しました。"
+    },
+    "abort": {
+      "already_configured": "この名前のモニターはすでに設定されています。"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Google Sheets Monitor オプション",
+        "description": "設定済みの各シートのスキャン間隔を調整します。"
+      }
+    }
+  }
+}

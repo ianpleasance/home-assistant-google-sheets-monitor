@@ -1,0 +1,7 @@
+{
+  "name": "Google Sheets Monitor",
+  "description": "Monitor Google Sheets for row changes, additions, and deletions, and fire Home Assistant events for automation.",
+  "homeassistant": "2024.1.0",
+  "country": [],
+  "category": "integration"
+}
