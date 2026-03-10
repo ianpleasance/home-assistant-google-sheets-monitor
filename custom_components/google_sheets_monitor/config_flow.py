@@ -5,7 +5,6 @@ import json
 import logging
 from typing import Any
 
-import gspread
 from google.oauth2.service_account import Credentials
 import voluptuous as vol
 
@@ -46,15 +45,20 @@ async def validate_credentials(hass: HomeAssistant, credentials_json: str) -> di
     if creds_dict.get("type") != "service_account":
         raise ValueError("not_service_account")
 
-    # Attempt to actually authenticate against the API
+    # Build credentials object — this validates the key format without a network call.
+    # We avoid list_spreadsheet_files() (requires Drive scope) and gspread.authorize()
+    # (removed in gspread 6.x). A full connectivity check is deferred to coordinator
+    # first-refresh so the user sees a meaningful HA repair issue rather than a
+    # generic config-flow error if the Sheets API is not yet enabled.
     try:
         raw_creds = await hass.async_add_executor_job(
-            Credentials.from_service_account_info, creds_dict
+            Credentials.from_service_account_info, creds_dict, GOOGLE_SCOPES
         )
-        creds = raw_creds.with_scopes(GOOGLE_SCOPES)
-        client = await hass.async_add_executor_job(gspread.authorize, creds)
-        # List spreadsheets to verify connectivity (lightweight call)
-        await hass.async_add_executor_job(client.list_spreadsheet_files)
+        # Trigger token refresh to catch invalid keys / revoked service accounts
+        # before we accept the credentials.
+        await hass.async_add_executor_job(raw_creds.refresh,
+            __import__("google.auth.transport.requests", fromlist=["Request"]).Request()
+        )
     except Exception as err:
         _LOGGER.debug("Credential validation failed: %s", err)
         raise ValueError("cannot_connect") from err
