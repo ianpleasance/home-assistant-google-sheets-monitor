@@ -22,7 +22,7 @@
           "scan_interval": "Intervalo de análise (segundos)"
         },
         "data_description": {
-          "id": "O ID da folha de cálculo no URL: docs.google.com/spreadsheets/d/{ID}/edit",
+          "id": "O ID da folha de cálculo no URL: docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit",
           "name": "Nome do separador a monitorizar. Deixar em branco para a primeira folha.",
           "scan_interval": "Com que frequência verificar alterações (10–3600 seg., predefinição: 30)."
         }

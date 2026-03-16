@@ -22,7 +22,7 @@
           "scan_interval": "Interwał skanowania (sekundy)"
         },
         "data_description": {
-          "id": "ID arkusza z adresu URL: docs.google.com/spreadsheets/d/{ID}/edit",
+          "id": "ID arkusza z adresu URL: docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit",
           "name": "Nazwa karty do monitorowania. Pozostaw puste dla pierwszego arkusza.",
           "scan_interval": "Jak często sprawdzać zmiany (10–3600 sek., domyślnie: 30)."
         }

@@ -22,7 +22,7 @@
           "scan_interval": "Skanningsintervall (sekunder)"
         },
         "data_description": {
-          "id": "Regneark-ID fra URL-en: docs.google.com/spreadsheets/d/{ID}/edit",
+          "id": "Regneark-ID fra URL-en: docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit",
           "name": "Navn på fanen som skal overvåkes. La stå tomt for første ark.",
           "scan_interval": "Hvor ofte endringer kontrolleres (10–3600 sek., standard: 30)."
         }

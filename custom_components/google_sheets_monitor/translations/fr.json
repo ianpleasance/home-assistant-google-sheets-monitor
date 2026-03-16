@@ -22,7 +22,7 @@
           "scan_interval": "Intervalle de scan (secondes)"
         },
         "data_description": {
-          "id": "L'ID de la feuille depuis l'URL : docs.google.com/spreadsheets/d/{ID}/edit",
+          "id": "L'ID de la feuille depuis l'URL : docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit",
           "name": "Nom de l'onglet à surveiller. Laisser vide pour la première feuille.",
           "scan_interval": "Fréquence de vérification des changements (10–3600 sec., défaut : 30)."
         }

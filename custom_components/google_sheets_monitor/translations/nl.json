@@ -22,7 +22,7 @@
           "scan_interval": "Scaninterval (seconden)"
         },
         "data_description": {
-          "id": "Het spreadsheet-ID uit de URL: docs.google.com/spreadsheets/d/{ID}/edit",
+          "id": "Het spreadsheet-ID uit de URL: docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit",
           "name": "Naam van het tabblad om te monitoren. Leeg laten voor het eerste blad.",
           "scan_interval": "Hoe vaak op wijzigingen wordt gecontroleerd (10–3600 sec., standaard: 30)."
         }

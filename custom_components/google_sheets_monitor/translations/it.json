@@ -22,7 +22,7 @@
           "scan_interval": "Intervallo di scansione (secondi)"
         },
         "data_description": {
-          "id": "L'ID del foglio dall'URL: docs.google.com/spreadsheets/d/{ID}/edit",
+          "id": "L'ID del foglio dall'URL: docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit",
           "name": "Nome della scheda da monitorare. Lasciare vuoto per il primo foglio.",
           "scan_interval": "Frequenza di controllo delle modifiche (10–3600 sec., predefinito: 30)."
         }

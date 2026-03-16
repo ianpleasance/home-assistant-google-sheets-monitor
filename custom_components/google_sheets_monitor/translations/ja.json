@@ -22,7 +22,7 @@
           "scan_interval": "スキャン間隔（秒）"
         },
         "data_description": {
-          "id": "URLのスプレッドシートID: docs.google.com/spreadsheets/d/{ID}/edit",
+          "id": "URLのスプレッドシートID: docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit",
           "name": "監視するタブ名。空白の場合は最初のシートを使用。",
           "scan_interval": "変更確認の頻度（10〜3600秒、デフォルト: 30）。"
         }

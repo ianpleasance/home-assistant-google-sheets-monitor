@@ -45,10 +45,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Parse and cache credentials once at setup — not on every poll
     try:
         creds_dict = json.loads(credentials_json)
-        raw_creds = await hass.async_add_executor_job(
-            Credentials.from_service_account_info, creds_dict
-        )
-        creds = raw_creds.with_scopes(GOOGLE_SCOPES)
+        def _build_creds():
+            return Credentials.from_service_account_info(creds_dict, scopes=GOOGLE_SCOPES)
+        creds = await hass.async_add_executor_job(_build_creds)
     except (json.JSONDecodeError, ValueError, KeyError) as err:
         _LOGGER.error("Invalid credentials JSON for %s: %s", person_name, err)
         raise ConfigEntryNotReady(f"Invalid credentials: {err}") from err
@@ -76,7 +75,49 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             )
         else:
             sheet = await hass.async_add_executor_job(lambda: spreadsheet.sheet1)
-        data = await hass.async_add_executor_job(sheet.get_all_records)
+
+        def _get_rows(ws: gspread.Worksheet) -> list[dict]:
+            """Fetch all rows, tolerating empty/duplicate header columns.
+
+            get_all_records() raises if any header cell is blank or duplicated
+            (common when a sheet has empty trailing columns). We use
+            get_all_values() instead and build the dicts ourselves, skipping
+            columns whose header is empty and completely empty data rows.
+
+            Each returned dict includes two reserved keys:
+              _sheet_row   — 1-based spreadsheet row number (row 1 = header)
+              _col_numbers — dict mapping header name -> 1-based column number
+            These are stripped from event payloads before firing.
+            """
+            all_values = ws.get_all_values()
+            if not all_values:
+                return []
+            headers = all_values[0]
+            # Build a mapping of header name -> 1-based column number for
+            # non-empty headers only, keeping the first occurrence if duplicated.
+            col_numbers: dict[str, int] = {}
+            for col_idx, h in enumerate(headers, start=1):
+                if h.strip() and h not in col_numbers:
+                    col_numbers[h] = col_idx
+            rows = []
+            # all_values[0] is the header row (sheet row 1), so data starts at
+            # sheet row 2 — enumerate with start=2 to track the real row number.
+            for sheet_row_number, row in enumerate(all_values[1:], start=2):
+                # Pad short rows so zip doesn't truncate
+                padded = row + [""] * (len(headers) - len(row))
+                row_dict = {
+                    h: v
+                    for h, v in zip(headers, padded)
+                    if h.strip()  # skip blank-header columns entirely
+                }
+                # Skip completely empty rows
+                if any(v.strip() for v in row_dict.values()):
+                    row_dict["_sheet_row"] = sheet_row_number
+                    row_dict["_col_numbers"] = col_numbers
+                    rows.append(row_dict)
+            return rows
+
+        data = await hass.async_add_executor_job(_get_rows, sheet)
         return sheet, data
 
     def make_check_sheet(
@@ -93,9 +134,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             state_key = f"{entry_person_name}:{spreadsheet_id}"
 
             try:
-                client = await hass.async_add_executor_job(
-                    gspread.authorize, entry_creds
-                )
+                def _make_client():
+                    return gspread.Client(auth=entry_creds)
+                client = await hass.async_add_executor_job(_make_client)
                 sheet, data = await fetch_spreadsheet(
                     client, spreadsheet_id, sheet_name
                 )
@@ -124,8 +165,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
             if state_key not in sheet_states:
                 # First run — initialise state, no events fired
-                _LOGGER.debug(
-                    "Initialising state for %s / %s (%d rows)",
+                _LOGGER.info(
+                    "Initialising state for %s / %s (%d rows) — changes will be detected from next poll",
                     entry_person_name,
                     spreadsheet_id,
                     len(data),
@@ -137,14 +178,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             last_data = sheet_states[state_key]
             fired_at = dt_util.now().isoformat()
 
+            def _clean(row: dict) -> dict:
+                """Strip internal tracking keys from row data before firing event."""
+                return {k: v for k, v in row.items() if k not in ("_sheet_row", "_col_numbers")}
+
             # Changed or added rows
             for i, row in enumerate(data):
+                sheet_row = row.get("_sheet_row", i + 2)
+                clean_row = _clean(row)
                 if i >= len(last_data):
-                    _LOGGER.debug(
+                    _LOGGER.info(
                         "Row add detected: %s / %s row %d",
                         entry_person_name,
                         spreadsheet_id,
-                        i + 1,
+                        sheet_row,
                     )
                     hass.bus.fire(
                         EVENT_ROW_CHANGE,
@@ -153,17 +200,27 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                             "spreadsheet_id": spreadsheet_id,
                             "sheet_name": sheet.title,
                             "event_type": "add",
-                            "row_number": i + 1,
-                            "row_data": row,
+                            "row_number": sheet_row,
+                            "row_data": clean_row,
                             "fired_at": fired_at,
                         },
                     )
-                elif row != last_data[i]:
-                    _LOGGER.debug(
-                        "Row change detected: %s / %s row %d",
+                elif _clean(row) != _clean(last_data[i]):
+                    old_row = _clean(last_data[i])
+                    col_numbers = row.get("_col_numbers", {})
+                    changed_columns = [
+                        k for k in set(list(clean_row.keys()) + list(old_row.keys()))
+                        if clean_row.get(k) != old_row.get(k)
+                    ]
+                    changed_column_numbers = [
+                        col_numbers[k] for k in changed_columns if k in col_numbers
+                    ]
+                    _LOGGER.info(
+                        "Row change detected: %s / %s row %d (columns: %s)",
                         entry_person_name,
                         spreadsheet_id,
-                        i + 1,
+                        sheet_row,
+                        ", ".join(changed_columns),
                     )
                     hass.bus.fire(
                         EVENT_ROW_CHANGE,
@@ -172,8 +229,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                             "spreadsheet_id": spreadsheet_id,
                             "sheet_name": sheet.title,
                             "event_type": "change",
-                            "row_number": i + 1,
-                            "row_data": row,
+                            "row_number": sheet_row,
+                            "row_data": clean_row,
+                            "previous_row_data": old_row,
+                            "changed_columns": changed_columns,
+                            "changed_column_numbers": changed_column_numbers,
                             "fired_at": fired_at,
                         },
                     )
@@ -181,11 +241,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             # Deleted rows
             if len(data) < len(last_data):
                 for i in range(len(data), len(last_data)):
-                    _LOGGER.debug(
+                    deleted_row = last_data[i]
+                    sheet_row = deleted_row.get("_sheet_row", i + 2)
+                    _LOGGER.info(
                         "Row delete detected: %s / %s row %d",
                         entry_person_name,
                         spreadsheet_id,
-                        i + 1,
+                        sheet_row,
                     )
                     hass.bus.fire(
                         EVENT_ROW_CHANGE,
@@ -194,8 +256,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                             "spreadsheet_id": spreadsheet_id,
                             "sheet_name": sheet.title,
                             "event_type": "delete",
-                            "row_number": i + 1,
-                            "row_data": last_data[i],
+                            "row_number": sheet_row,
+                            "row_data": _clean(deleted_row),
                             "fired_at": fired_at,
                         },
                     )

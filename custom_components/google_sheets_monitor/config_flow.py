@@ -45,22 +45,15 @@ async def validate_credentials(hass: HomeAssistant, credentials_json: str) -> di
     if creds_dict.get("type") != "service_account":
         raise ValueError("not_service_account")
 
-    # Build credentials object — this validates the key format without a network call.
-    # We avoid list_spreadsheet_files() (requires Drive scope) and gspread.authorize()
-    # (removed in gspread 6.x). A full connectivity check is deferred to coordinator
-    # first-refresh so the user sees a meaningful HA repair issue rather than a
-    # generic config-flow error if the Sheets API is not yet enabled.
+    # Validate JSON structure only — no network call needed.
+    # Log the actual exception at WARNING level so it appears in HA logs
+    # and we can diagnose exactly what is failing.
     try:
-        raw_creds = await hass.async_add_executor_job(
-            Credentials.from_service_account_info, creds_dict, GOOGLE_SCOPES
-        )
-        # Trigger token refresh to catch invalid keys / revoked service accounts
-        # before we accept the credentials.
-        await hass.async_add_executor_job(raw_creds.refresh,
-            __import__("google.auth.transport.requests", fromlist=["Request"]).Request()
-        )
+        def _build_creds():
+            return Credentials.from_service_account_info(creds_dict, scopes=GOOGLE_SCOPES)
+        await hass.async_add_executor_job(_build_creds)
     except Exception as err:
-        _LOGGER.debug("Credential validation failed: %s", err)
+        _LOGGER.warning("Google Sheets credential validation failed: %s", err)
         raise ValueError("cannot_connect") from err
 
     return creds_dict
@@ -229,3 +222,4 @@ class GoogleSheetsMonitorOptionsFlow(config_entries.OptionsFlow):
             step_id="init",
             data_schema=vol.Schema(schema_dict),
         )
+

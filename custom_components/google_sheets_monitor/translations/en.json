@@ -22,7 +22,7 @@
           "scan_interval": "Scan Interval (seconds)"
         },
         "data_description": {
-          "id": "The spreadsheet ID from the URL: docs.google.com/spreadsheets/d/{ID}/edit",
+          "id": "The spreadsheet ID from the URL: docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit",
           "name": "Name of the tab to monitor. Leave blank to monitor the first sheet.",
           "scan_interval": "How often to check for changes (10–3600 seconds, default: 30)."
         }

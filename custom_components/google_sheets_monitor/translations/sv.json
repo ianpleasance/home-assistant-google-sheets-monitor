@@ -22,7 +22,7 @@
           "scan_interval": "Skanningsintervall (sekunder)"
         },
         "data_description": {
-          "id": "Kalkylblads-ID:t från URL:en: docs.google.com/spreadsheets/d/{ID}/edit",
+          "id": "Kalkylblads-ID:t från URL:en: docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit",
           "name": "Namnet på fliken att övervaka. Lämna tomt för det första bladet.",
           "scan_interval": "Hur ofta ändringar kontrolleras (10–3600 sek., standard: 30)."
         }

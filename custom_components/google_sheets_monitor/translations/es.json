@@ -22,7 +22,7 @@
           "scan_interval": "Intervalo de escaneo (segundos)"
         },
         "data_description": {
-          "id": "El ID de la hoja de cálculo de la URL: docs.google.com/spreadsheets/d/{ID}/edit",
+          "id": "El ID de la hoja de cálculo de la URL: docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit",
           "name": "Nombre de la pestaña a monitorizar. Dejar en blanco para la primera hoja.",
           "scan_interval": "Frecuencia de comprobación de cambios (10–3600 seg., predeterminado: 30)."
         }

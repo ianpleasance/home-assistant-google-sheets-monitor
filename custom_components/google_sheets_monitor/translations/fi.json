@@ -22,7 +22,7 @@
           "scan_interval": "Skannausväli (sekuntia)"
         },
         "data_description": {
-          "id": "Laskentataulukon tunnus URL:sta: docs.google.com/spreadsheets/d/{ID}/edit",
+          "id": "Laskentataulukon tunnus URL:sta: docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit",
           "name": "Seurattavan välilehden nimi. Jätä tyhjäksi ensimmäistä taulukkoa varten.",
           "scan_interval": "Kuinka usein muutoksia tarkistetaan (10–3600 sek., oletus: 30)."
         }

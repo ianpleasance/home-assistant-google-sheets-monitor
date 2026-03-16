@@ -22,7 +22,7 @@
           "scan_interval": "Abtastintervall (Sekunden)"
         },
         "data_description": {
-          "id": "Die Tabellen-ID aus der URL: docs.google.com/spreadsheets/d/{ID}/edit",
+          "id": "Die Tabellen-ID aus der URL: docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit",
           "name": "Name des zu überwachenden Blatts. Leer lassen für das erste Blatt.",
           "scan_interval": "Wie oft auf Änderungen geprüft wird (10–3600 Sek., Standard: 30)."
         }
