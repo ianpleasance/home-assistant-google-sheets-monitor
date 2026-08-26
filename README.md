@@ -1,7 +1,8 @@
 # Google Sheets Monitor
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)
-[![Version](https://img.shields.io/badge/version-1.4.2-blue.svg)](https://github.com/ianpleasance/home-assistant-google-sheets-monitor)
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-c62828.svg)](https://github.com/hacs/integration)
+[![version](https://img.shields.io/github/v/release/ianpleasance/home-assistant-google-sheets-monitor?display_name=tag&sort=semver&color=blue&label=version)](https://github.com/ianpleasance/home-assistant-google-sheets-monitor/releases/latest)
+[![license](https://img.shields.io/github/license/ianpleasance/home-assistant-google-sheets-monitor)](LICENSE)
 
 A Home Assistant custom integration that monitors Google Sheets for row changes, additions, and deletions, and fires events that can trigger automations.
 
